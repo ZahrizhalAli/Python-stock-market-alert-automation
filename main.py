@@ -1,16 +1,10 @@
 import requests
-import datetime as dt
 from decouple import config
 from twilio.rest import Client
 
 account_sid = config('ACCOUNT_SID')
 auth_token = config('AUTH_TOKEN')
 client = Client(account_sid, auth_token)
-
-time = dt.datetime.now(dt.timezone.utc)
-time_now = str(time)
-today = time_now.split(" ")[0]
-print("Today is " + today)
 
 STOCK_NAME = "TSLA"
 COMPANY_NAME = "Tesla Inc"
@@ -45,11 +39,10 @@ before_yesterday_closing_data = before_yesterday['4. close']
 difference_price = abs(float(yesterday_closing_data) - float(before_yesterday_closing_data))
 # print(difference_price)
 up_down = None
-if difference_price > 0:
+if difference_price > 0:            # Above 0 means the stock closing price is increasing
     up_down = "⬆"
 else:
     up_down = "⬇"
-
 
 diff_percent = (difference_price / float(yesterday_closing_data)) * 100
 # print(f"{diff_percent}%")
@@ -58,18 +51,12 @@ if diff_percent >= 5:
     news_response = requests.get(NEWS_ENDPOINT, params=news_params)
     articles = news_response.json()['articles']
     three_articles = articles[:3]
-    # print(three_articles)
 
     formatted_articles = [f"{STOCK_NAME}: {up_down}{round(diff_percent)}% \nHeadline: {article['title']}. "
                           f"\n Brief: {article['description']}" for article in three_articles]
     for ar in formatted_articles:
-        message = client.messages \
-            .create(
+        message = client.messages.create(
             body=ar,
             from_='YOUR_PHONE_NUMBER_API_SERVICE',
             to='YOUR_PHONE_NUMBER'
         )
-
-
-
-
